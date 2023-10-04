@@ -1,21 +1,23 @@
 # Simple makefile.
 
-NAME	=	a.out
+NAME	=	assignment
 CC		=	cc
 SRCS	=	main.c\
-			src.c\
+			hw1.c\
+
 
 CFLAG	=	-Wall -Wextra -Werror
 FFLAG	=	-fsanitize=address
 OBJS	=	$(SRCS:%.c=%.o)
 
 all		:	$(NAME)
+	make clean
 
 $(NAME)	:	$(OBJS)
-	$(CC) $(CFLAG) $(FFLAG) -o $@ $^
+	$(CC) $(FFLAG) -o $@ $^
 
 %.o		:	%.c
-	$(CC) $(CFLAG) $(FFLAG) -c $< -o $@
+	$(CC) $(FFLAG) -c $< -o $@
 
 clean	:
 	rm -rf $(OBJS)
@@ -23,6 +25,7 @@ clean	:
 fclean	:
 	make clean
 	rm -rf $(NAME)
+	rm -rf storage
 
 re		:
 	make fclean

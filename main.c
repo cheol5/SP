@@ -1,11 +1,14 @@
+# include "my.h"
 # include "hw1.h"
 
-int main(int ac, char *av[])
+// caution : header에서 extern 으로 선언 하고 여기서 따로 선언해서 사용해야 전역변수로 사용가능.
+int fd = 0;
+
+int	main(void)
 {
-	int	fd;
-	if (fd = open("test.txt", O_RDONLY) < 0)
-	{
-		perror("open");
-		exit (1);
-	}
+
+
+	Init();
+	return 0;
 }
+
