@@ -2,7 +2,7 @@
 
 #define __HW1_H__
 
-#define MAX_STORAGE_SIZE (66536)
+#define MAX_STORAGE_SIZE (65500)
 #define STORAGE_NAME "storage"
 
 typedef enum __BlockState{
