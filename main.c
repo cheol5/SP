@@ -8,6 +8,7 @@ int	main(void)
 	char arr[3] = {0};
 	Init();
 	InitStorage();
+	//InsertData()
 	return 0;
 }
 

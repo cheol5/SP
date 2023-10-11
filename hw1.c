@@ -2,45 +2,6 @@
 #include "my.h"
 #include "hw1.h"
 
-static int	getLength(int n)
-{
-	int	len = 0;
-
-	if (n <= 0)
-		len++;
-	while (n)
-	{
-		n /= 10;
-		len++;
-	}
-	return (len);
-}
-
-char *itoa(int n)
-{
-	int		i = getLength(n);
-	char	*arr;
-
-	arr = (char *)malloc(sizeof(char) * (i + 1));
-	if (!arr)
-		return (0);
-	arr[i--] = 0;
-	arr[0] = '0';
-	while (n)
-	{
-		arr[i--] = n % 10 + '0';
-		n /= 10;
-	}
-	if (n < 0)
-		arr[0] = '-';
-	return(arr);
-}
-
-void ft_memcpy(void *arr)
-{
-
-}
-
 // !! Write를 하면 자동으로 current File offset이 write다음 바이트로 변경됨.
 void Init(void)
 {
@@ -117,8 +78,6 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	// Assumption 항상 null로 채워져있다고 가정. 삭제할 때 null처리하기!
 	if (blockSize > arrSize + HEAD + TAIL)
 		leftBlock(blockSize - arrSize);
-	else
-		
 	free(arr);
 	return ;
 }
@@ -139,13 +98,14 @@ int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 			read(fd, arrOfKey, keySize);
 			if(!strcmp(key, arrOfKey))
 			{
-				// search!!
+				// search 성공
 				free(arrOfKey);
 				// dataSize만큼 할당 후 read하고 cpy.
 				arrOfKey = (char *)malloc(sizeof(char) * buf[4]);
 				read(fd, arrOfKey, buf[4]);
 				memcpy(pBuf, arrOfKey, buf[4]);
 				free(arrOfKey);
+				lseek(fd, 0, SEEK_SET); // offset처음으로.
 				return ;
 			}
 			free(arrOfKey);
@@ -171,14 +131,16 @@ int RemoveDataByKey(char* key, int keySize)
 			arrOfKey = (char *)malloc(sizeof(char) * keySize + 1);
 			arrOfKey[keySize] = 0;
 			read(fd, arrOfKey, keySize);
-			if(!strcmp(key, arrOfKey))
+			if(!strcmp(key, arrOfKey)) // return 0이면 같음! 
 			{
 				// search!! 앞뒤블럭 탐색 후 합치기 드가자
+				// 근데 하나의 함수에 너무 많은 기능이 있는 것은 좋지 않을 것 같기도 해서 고민중인데 일단은
+				// remove만 작성하려고 함. 
 				free(arrOfKey);
-				arrOfKey = (char *)malloc(sizeof(char) * buf[4]);
+				arrOfKey = (char *)malloc(sizeof(char) * blockSize);
 				read(fd, arrOfKey, buf[4]);
 				free(arrOfKey);
-				return ;
+				return 1;
 			}
 			free(arrOfKey);
 			lseek(fd, blockSize - HEAD - keySize, SEEK_CUR);
@@ -186,7 +148,7 @@ int RemoveDataByKey(char* key, int keySize)
 		else
 			lseek(fd, blockSize - HEAD, SEEK_CUR);
 	}
-	return ;
+	return 1;
 }
 
 // void InitStorage(void)
