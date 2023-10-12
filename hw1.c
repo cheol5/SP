@@ -28,9 +28,8 @@ void InitStorage(void)
 	write(fd, &blockSize, 2);
 	lseek(fd, -2, SEEK_END);
 	write(fd, &blockSize, 2);
-	printf("SEEK END is %d\n", SEEK_END);
 }
-/*
+
 // 남은 블럭을 null, 표식자, 크기로 채워넣는다. 
 static int	leftBlock(unsigned short leftBlockSize)
 {
@@ -88,7 +87,7 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	free(arr);
 	return ;
 }
-
+/*
 //성공 시 return값 : 읽은 data의 크기. 실패 시 -1.
 int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 {
