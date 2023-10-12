@@ -58,7 +58,7 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	memcpy(&arr[5], key, keySize);
 	memcpy(&arr[5 + keySize], pBuf, bufSize);
 	lseek(fd, 0, SEEK_SET); // first in fit.
-	while (read(fd, buf, BUFFER_SIZE))
+	while (read(fd, buf, BUFFER_SIZE)) // EOF이후에 lseek하게 되어 read하는 예외케이스 존재가능.
 	{
 		memcpy(blockSize, &buf[1], 2);
 		if (buf[0] == 'F' || blockSize < arrSize)
@@ -88,6 +88,7 @@ int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 	char			*arrOfKey;
 	unsigned short	blockSize;
 
+	lseek(fd, 0, SEEK_CUR);
 	while (read(fd, buf, HEAD))
 	{
 		memcpy(&blockSize, &buf[1], 2);
