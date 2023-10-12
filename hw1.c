@@ -3,11 +3,31 @@
 #include "hw1.h"
 
 // !! Write를 하면 자동으로 current File offset이 write다음 바이트로 변경됨.
-/*
+
 int GetBlocks(Block* pBuf, int bufSize)
 {
+	int		i;
+	char	arr[HEAD];
+	char	*block;
+	int		offset = 0;
 
-}*/
+	i = 0;
+	lseek(fd, 0, SEEK_SET);
+	while (i < bufSize && offset < MAX_STORAGE_SIZE)
+	{
+		if (read(fd, arr, HEAD))
+			break ;
+		memcpy(pBuf[i].blockState, arr[0], 1);
+		memcpy(pBuf[i].blockOffset, &arr[1], 2);
+		memcpy(pBuf[i].keySize, &arr[3], 1);
+		memcpy(pBuf[i].dataSize, &arr[4], 1);
+		pBuf[i].sizeHead = HEAD;
+		pBuf[i].sizeTail = TAIL;
+		offset = lseek(fd, pBuf[i].blockOffset - HEAD, SEEK_CUR);
+		i++;
+	}
+	return (i);
+}
 
 void Init(void)
 {
