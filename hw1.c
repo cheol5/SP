@@ -85,7 +85,7 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	if (blockSize > arrSize + HEAD + TAIL)
 		leftBlock(blockSize - arrSize);
 	free(arr);
-	return ;
+	return (1);
 }
 /*
 //성공 시 return값 : 읽은 data의 크기. 실패 시 -1.
