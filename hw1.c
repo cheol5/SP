@@ -3,6 +3,12 @@
 #include "hw1.h"
 
 // !! Write를 하면 자동으로 current File offset이 write다음 바이트로 변경됨.
+/*
+int GetBlocks(Block* pBuf, int bufSize)
+{
+
+}*/
+
 void Init(void)
 {
 	fd = 0;
@@ -12,7 +18,6 @@ void InitStorage(void)
 {
 	unsigned short blockSize = MAX_STORAGE_SIZE - 1;
 	char arr[]="This is the test\n";
-	unsigned short check;
 	// WRONLY를 빼먹으면 파일 작성이 되지 않는다. 한번 만들어진 파일은 재생성 되지 않음. 
 	if ((fd = open(STORAGE_NAME, O_CREAT|O_RDWR|O_TRUNC, 0755)) < 0)
 	{
@@ -52,7 +57,7 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	unsigned short	blockSize;
 	char			buf[BUFFER_SIZE];
 	int				sum = 0;
-	int				nbytes;
+	int				offset;
 
 	arrSize = keySize + bufSize + HEAD + TAIL; 
 	arr = (char *)malloc(sizeof(char) * (arrSize));
@@ -66,20 +71,20 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	memcpy(&arr[5], key, keySize);
 	memcpy(&arr[5 + keySize], pBuf, bufSize);
 	memcpy(&arr[arrSize - 2], &arrSize, 2);
-	lseek(fd, 0, SEEK_SET); // first in fit.
-	while ((nbytes = read(fd, buf, BUFFER_SIZE)))
+	offset = lseek(fd, 0, SEEK_SET); // first in fit.
+	while (read(fd, buf, BUFFER_SIZE))
 	{
-		sum += nbytes;
 		memcpy(&blockSize, &buf[1], 2);
 		if (buf[0] == 'F' || blockSize < arrSize)
 		{
-			if (sum + arrSize > MAX_STORAGE_SIZE)
+			//EOF가기 전에 여기서 에러처리를 하게 되어있다! 
+			if (offset + blockSize + arrSize > MAX_STORAGE_SIZE)
 			{
 				free(arr);
 				perror("There's no storage");
 				exit(1);
 			}
-			lseek(fd, blockSize - BUFFER_SIZE, SEEK_CUR);
+			offset = lseek(fd, blockSize - BUFFER_SIZE, SEEK_CUR);
 		}
 		else
 			break;
@@ -94,11 +99,10 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 }
 
 //성공 시 return값 : 읽은 data의 크기. 실패 시 -1.
-int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
+int GetDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 {
 	char			buf[HEAD];
 	char			*arrOfKey;
-	char			*block;
 	unsigned short	blockSize;
 
 	lseek(fd, 0, SEEK_SET);

@@ -10,7 +10,6 @@ typedef enum __BlockState{
     ALLOC_BLOCK = 1
 } BlockState;
 
-
 typedef struct __Block {
     int blockOffset;
     int blockState;

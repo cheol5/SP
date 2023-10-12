@@ -22,11 +22,15 @@ char* data[DATA_SIZE] = { "Hi",
 int	fd;
 int	main(void)
 {
-	//char arr[] = {0};
-	Init();
+	char arr[100] = {0};
+	int nbytes = 0;
+    int j = 0;
+    Init();
 	InitStorage();
 	for (int i = 0; i < 4; i++)
 		InsertData(key[i], keySize[i], data[i], dataSize[i]);
-	return 0;
+	nbytes = GetDataByKey(key[j], keySize[j], arr, 100);
+    printf("key : %s, data : %s, dataSize : %d\n", key[j], arr, nbytes);
+    return 0;
 }
 

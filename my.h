@@ -4,6 +4,7 @@
 # define BUFFER_SIZE 3 // Check Available and block size. + null
 
 extern int fd;
+
 #define HEAD 5 // head(5) tail(2)
 #define TAIL 2
 # include <stdio.h>
