@@ -30,12 +30,18 @@ void InitStorage(void)
 	write(fd, &blockSize, 2);
 }
 
-static int	leftBlock(unsigned short leftBlockSize)
+// 남은 블럭을 null, 표식자, 크기로 채워넣는다. 
+static void	leftBlock(unsigned short leftBlockSize)
 {
-	write(fd, "A", 1);
-	write(fd, &leftBlockSize, 2);
-	lseek(fd, leftBlockSize - BUFFER_SIZE - 2, SEEK_CUR);
-	write(fd, &leftBlockSize, 2);
+	char	*leftBlock;
+
+	leftBlock = (char *)malloc(leftBlockSize);
+	memset(leftBlock, 0, leftBlockSize);
+	memcpy(leftBlock, "A", 1);
+	memcpy(&leftBlock[1], &leftBlockSize, 2);
+	memcpy(&leftBlock[leftBlockSize - 2], &leftBlockSize, 2);
+	write(fd, leftBlock, leftBlockSize);
+	free(leftBlock);
 }
 
 //동적할당 후 (mem)cpy이후 head정보를 보고 삽입 위치 결정.
@@ -45,6 +51,8 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	unsigned short	arrSize;
 	unsigned short	blockSize;
 	char			buf[BUFFER_SIZE];
+	int				sum = 0;
+	int				nbytes;
 
 	arrSize = keySize + bufSize + HEAD + TAIL; 
 	arr = (char *)malloc(sizeof(char) * (arrSize));
@@ -57,13 +65,15 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	memcpy(&arr[1 + 2 + 1], &bufSize, 1);
 	memcpy(&arr[5], key, keySize);
 	memcpy(&arr[5 + keySize], pBuf, bufSize);
+	memcpy(&arr[arrSize - 2], &arrSize, 2);
 	lseek(fd, 0, SEEK_SET); // first in fit.
-	while (read(fd, buf, BUFFER_SIZE)) // EOF이후에 lseek하게 되어 read하는 예외케이스 존재가능.
+	while ((nbytes = read(fd, buf, BUFFER_SIZE)))
 	{
-		memcpy(blockSize, &buf[1], 2);
+		sum += nbytes;
+		memcpy(&blockSize, &buf[1], 2);
 		if (buf[0] == 'F' || blockSize < arrSize)
 		{
-			if (SEEK_CUR + arrSize > MAX_STORAGE_SIZE)
+			if (sum + arrSize > MAX_STORAGE_SIZE)
 			{
 				free(arr);
 				perror("There's no storage");
@@ -74,21 +84,24 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 		else
 			break;
 	}
-	write(fd, arr, arrSize); // offset 더해짐 주의
+	lseek(fd, -BUFFER_SIZE, SEEK_CUR);
+	write(fd, arr, arrSize);
 	// Assumption 항상 null로 채워져있다고 가정. 삭제할 때 null처리하기!
 	if (blockSize > arrSize + HEAD + TAIL)
 		leftBlock(blockSize - arrSize);
 	free(arr);
-	return ;
+	return (1);
 }
-
+/*
+//성공 시 return값 : 읽은 data의 크기. 실패 시 -1.
 int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 {
 	char			buf[HEAD];
 	char			*arrOfKey;
+	char			*block;
 	unsigned short	blockSize;
 
-	lseek(fd, 0, SEEK_CUR);
+	lseek(fd, 0, SEEK_SET);
 	while (read(fd, buf, HEAD))
 	{
 		memcpy(&blockSize, &buf[1], 2);
@@ -103,11 +116,13 @@ int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 				free(arrOfKey);
 				// dataSize만큼 할당 후 read하고 cpy.
 				arrOfKey = (char *)malloc(sizeof(char) * buf[4]);
+				if (!arrOfKey)
+					return (0);
 				read(fd, arrOfKey, buf[4]);
 				memcpy(pBuf, arrOfKey, buf[4]);
 				free(arrOfKey);
 				lseek(fd, 0, SEEK_SET); // offset처음으로.
-				return ;
+				return ((int)buf[4]);
 			}
 			free(arrOfKey);
 			lseek(fd, blockSize - HEAD - keySize, SEEK_CUR);
@@ -115,7 +130,7 @@ int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 		else
 			lseek(fd, blockSize - HEAD, SEEK_CUR);
 	}
-	return ;
+	return (-1);
 }
 
 int RemoveDataByKey(char* key, int keySize)
@@ -137,10 +152,12 @@ int RemoveDataByKey(char* key, int keySize)
 				// search!! 앞뒤블럭 탐색 후 합치기 드가자
 				// 근데 하나의 함수에 너무 많은 기능이 있는 것은 좋지 않을 것 같기도 해서 고민중인데 일단은
 				// remove만 작성하려고 함. 
+				lseek(fd, -(keySize + HEAD), SEEK_CUR);
 				free(arrOfKey);
 				arrOfKey = (char *)malloc(sizeof(char) * blockSize);
-				read(fd, arrOfKey, buf[4]);
-				free(arrOfKey);
+				memset(arrOfKey, 0, blockSize);
+				write(fd, arrOfKey, blockSize);
+				lseek(fd, 0, SEEK_SET); // 오프셋 제자리.
 				return 1;
 			}
 			free(arrOfKey);
@@ -151,7 +168,7 @@ int RemoveDataByKey(char* key, int keySize)
 	}
 	return 1;
 }
-
+*/
 // void InitStorage(void)
 // {
 
