@@ -92,7 +92,7 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	free(arr);
 	return (1);
 }
-/*
+
 //성공 시 return값 : 읽은 data의 크기. 실패 시 -1.
 int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 {
@@ -132,7 +132,7 @@ int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 	}
 	return (-1);
 }
-
+/*
 int RemoveDataByKey(char* key, int keySize)
 {
 	char			buf[HEAD];
