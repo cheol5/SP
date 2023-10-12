@@ -1,9 +1,7 @@
 #ifndef MY_H
 # define MY_H
 
- # ifndef BUFFER_SIZE
- #  define BUFFER_SIZE 3 // Check Available and block size. + null
- # endif
+# define BUFFER_SIZE 3 // Check Available and block size. + null
 
 extern int fd;
 #define HEAD 5 // head(5) tail(2)

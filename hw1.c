@@ -28,14 +28,21 @@ void InitStorage(void)
 	write(fd, &blockSize, 2);
 	lseek(fd, -2, SEEK_END);
 	write(fd, &blockSize, 2);
+	printf("SEEK END is %d\n", SEEK_END);
 }
-
+/*
+// 남은 블럭을 null, 표식자, 크기로 채워넣는다. 
 static int	leftBlock(unsigned short leftBlockSize)
 {
-	write(fd, "A", 1);
-	write(fd, &leftBlockSize, 2);
-	lseek(fd, leftBlockSize - BUFFER_SIZE - 2, SEEK_CUR);
-	write(fd, &leftBlockSize, 2);
+	char	*leftBlock;
+
+	leftBlock = (char *)malloc(leftBlockSize);
+	memset(leftBlock, 0, leftBlockSize);
+	memcpy(leftBlock, "A", 1);
+	memcpy(&leftBlock[1], &leftBlockSize, 2);
+	memcpy(&leftBlock[leftBlockSize - 2], &leftBlockSize, 2);
+	write(fd, leftBlock, leftBlockSize);
+	free(leftBlock);
 }
 
 //동적할당 후 (mem)cpy이후 head정보를 보고 삽입 위치 결정.
@@ -82,12 +89,15 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	return ;
 }
 
+//성공 시 return값 : 읽은 data의 크기. 실패 시 -1.
 int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 {
 	char			buf[HEAD];
 	char			*arrOfKey;
+	char			*block;
 	unsigned short	blockSize;
 
+	lseek(fd, 0, SEEK_SET);
 	while (read(fd, buf, HEAD))
 	{
 		memcpy(&blockSize, &buf[1], 2);
@@ -102,11 +112,13 @@ int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 				free(arrOfKey);
 				// dataSize만큼 할당 후 read하고 cpy.
 				arrOfKey = (char *)malloc(sizeof(char) * buf[4]);
+				if (!arrOfKey)
+					return (0);
 				read(fd, arrOfKey, buf[4]);
 				memcpy(pBuf, arrOfKey, buf[4]);
 				free(arrOfKey);
 				lseek(fd, 0, SEEK_SET); // offset처음으로.
-				return ;
+				return ((int)buf[4]);
 			}
 			free(arrOfKey);
 			lseek(fd, blockSize - HEAD - keySize, SEEK_CUR);
@@ -114,7 +126,7 @@ int getDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 		else
 			lseek(fd, blockSize - HEAD, SEEK_CUR);
 	}
-	return ;
+	return (-1);
 }
 
 int RemoveDataByKey(char* key, int keySize)
@@ -136,10 +148,12 @@ int RemoveDataByKey(char* key, int keySize)
 				// search!! 앞뒤블럭 탐색 후 합치기 드가자
 				// 근데 하나의 함수에 너무 많은 기능이 있는 것은 좋지 않을 것 같기도 해서 고민중인데 일단은
 				// remove만 작성하려고 함. 
+				lseek(fd, -(keySize + HEAD), SEEK_CUR);
 				free(arrOfKey);
 				arrOfKey = (char *)malloc(sizeof(char) * blockSize);
-				read(fd, arrOfKey, buf[4]);
-				free(arrOfKey);
+				memset(arrOfKey, 0, blockSize);
+				write(fd, arrOfKey, blockSize);
+				lseek(fd, 0, SEEK_SET); // 오프셋 제자리.
 				return 1;
 			}
 			free(arrOfKey);
@@ -150,7 +164,7 @@ int RemoveDataByKey(char* key, int keySize)
 	}
 	return 1;
 }
-
+*/
 // void InitStorage(void)
 // {
 
