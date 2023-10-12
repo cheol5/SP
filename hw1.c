@@ -31,7 +31,7 @@ void InitStorage(void)
 }
 
 // 남은 블럭을 null, 표식자, 크기로 채워넣는다. 
-static int	leftBlock(unsigned short leftBlockSize)
+static void	leftBlock(unsigned short leftBlockSize)
 {
 	char	*leftBlock;
 
@@ -51,6 +51,8 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	unsigned short	arrSize;
 	unsigned short	blockSize;
 	char			buf[BUFFER_SIZE];
+	int				sum = 0;
+	int				nbytes;
 
 	arrSize = keySize + bufSize + HEAD + TAIL; 
 	arr = (char *)malloc(sizeof(char) * (arrSize));
@@ -63,13 +65,15 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	memcpy(&arr[1 + 2 + 1], &bufSize, 1);
 	memcpy(&arr[5], key, keySize);
 	memcpy(&arr[5 + keySize], pBuf, bufSize);
+	memcpy(&arr[arrSize - 2], &arrSize, 2);
 	lseek(fd, 0, SEEK_SET); // first in fit.
-	while (read(fd, buf, BUFFER_SIZE))
+	while ((nbytes = read(fd, buf, BUFFER_SIZE)))
 	{
-		memcpy(blockSize, &buf[1], 2);
+		sum += nbytes;
+		memcpy(&blockSize, &buf[1], 2);
 		if (buf[0] == 'F' || blockSize < arrSize)
 		{
-			if (SEEK_CUR + arrSize > MAX_STORAGE_SIZE)
+			if (sum + arrSize > MAX_STORAGE_SIZE)
 			{
 				free(arr);
 				perror("There's no storage");
@@ -80,7 +84,8 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 		else
 			break;
 	}
-	write(fd, arr, arrSize); // offset 더해짐 주의
+	lseek(fd, -BUFFER_SIZE, SEEK_CUR);
+	write(fd, arr, arrSize);
 	// Assumption 항상 null로 채워져있다고 가정. 삭제할 때 null처리하기!
 	if (blockSize > arrSize + HEAD + TAIL)
 		leftBlock(blockSize - arrSize);
