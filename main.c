@@ -22,15 +22,32 @@ char* data[DATA_SIZE] = { "Hi",
 int	fd;
 int	main(void)
 {
-	char arr[100] = {0};
+	char arr[200] = {0};
 	int nbytes = 0;
     int j = 0;
+    Block buf[100] = {0};
+
     Init();
 	InitStorage();
 	for (int i = 0; i < 4; i++)
 		InsertData(key[i], keySize[i], data[i], dataSize[i]);
 	nbytes = GetDataByKey(key[j], keySize[j], arr, 100);
-    printf("key : %s, data : %s, dataSize : %d\n", key[j], arr, nbytes);
+    for (int j = 0; j < 4; j++)
+    {
+        memset(arr, 0, 100);
+        nbytes = GetDataByKey(key[j], keySize[j], arr, 100);
+        printf("key : %s, data : %s, dataSize : %d\n", key[j], arr, nbytes);
+    }
+    GetBlocks(buf, 100);
+	for (int i = 0; i < 4; i++)
+    {
+        printf("buf[%d].blockState : %c\n", i, buf[i].blockState);
+        printf("buf[%d].blockOffset : %d\n", i, buf[i].blockOffset);
+        printf("buf[%d].keySize : %d\n", i, buf[i].keySize);
+        printf("buf[%d].dataSize : %d\n", i, buf[i].dataSize);
+        printf("buf[%d].sizeHead : %d\n", i, buf[i].sizeHead);
+        printf("buf[%d].sizeTail : %d\n", i, buf[i].sizeTail);
+    }
     return 0;
 }
 

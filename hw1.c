@@ -8,23 +8,26 @@ int GetBlocks(Block* pBuf, int bufSize)
 {
 	int		i;
 	char	arr[HEAD];
-	char	*block;
 	int		offset = 0;
+	int		blcokSize;
 
 	i = 0;
-	lseek(fd, 0, SEEK_SET);
-	while (i < bufSize && offset < MAX_STORAGE_SIZE)
+	offset = lseek(fd, 0, SEEK_SET); //first in fit
+	printf("first offset is %d\n", offset);
+	while (i < bufSize && offset < MAX_STORAGE_SIZE) 
 	{
-		if (read(fd, arr, HEAD))
+		if (!(read(fd, arr, HEAD)))
 			break ;
-		memcpy(pBuf[i].blockState, arr[0], 1);
-		memcpy(pBuf[i].blockOffset, &arr[1], 2);
-		memcpy(pBuf[i].keySize, &arr[3], 1);
-		memcpy(pBuf[i].dataSize, &arr[4], 1);
+		memcpy(&pBuf[i].blockState, &arr[0], 1);
+		memcpy(&pBuf[i].blockOffset, &offset, 4);
+		memcpy(&pBuf[i].keySize, &arr[3], 1);
+		memcpy(&pBuf[i].dataSize, &arr[4], 1);
 		pBuf[i].sizeHead = HEAD;
 		pBuf[i].sizeTail = TAIL;
-		offset = lseek(fd, pBuf[i].blockOffset - HEAD, SEEK_CUR);
+		memcpy(&blcokSize, &arr[1], 2);
+		offset = lseek(fd, blcokSize - HEAD, SEEK_CUR);
 		i++;
+		printf("GetBlock's i is %d, offset : %d\n", i, offset);
 	}
 	return (i);
 }
@@ -36,7 +39,7 @@ void Init(void)
 
 void InitStorage(void)
 {
-	unsigned short blockSize = MAX_STORAGE_SIZE - 1;
+	unsigned short blockSize = MAX_STORAGE_SIZE;
 	char arr[]="This is the test\n";
 	// WRONLY를 빼먹으면 파일 작성이 되지 않는다. 한번 만들어진 파일은 재생성 되지 않음. 
 	if ((fd = open(STORAGE_NAME, O_CREAT|O_RDWR|O_TRUNC, 0755)) < 0)
@@ -125,7 +128,7 @@ int GetDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 	char			*arrOfKey;
 	unsigned short	blockSize;
 
-	lseek(fd, 0, SEEK_SET);
+	lseek(fd, 0, SEEK_SET); //first in fit
 	while (read(fd, buf, HEAD))
 	{
 		memcpy(&blockSize, &buf[1], 2);

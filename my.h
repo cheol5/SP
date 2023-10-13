@@ -7,6 +7,7 @@ extern int fd;
 
 #define HEAD 5 // head(5) tail(2)
 #define TAIL 2
+
 # include <stdio.h>
 # include <unistd.h>
 # include <stdlib.h>
