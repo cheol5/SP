@@ -3,7 +3,6 @@
 #include "hw1.h"
 
 // !! Write를 하면 자동으로 current File offset이 write다음 바이트로 변경됨.
-
 int GetBlocks(Block* pBuf, int bufSize)
 {
 	int		i;
