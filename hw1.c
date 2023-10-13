@@ -3,6 +3,9 @@
 #include "hw1.h"
 
 // !! Write를 하면 자동으로 current File offset이 write다음 바이트로 변경됨.
+
+int fd;
+
 int GetBlocks(Block* pBuf, int bufSize)
 {
 	int		i;
@@ -39,7 +42,7 @@ void Init(void)
 void InitStorage(void)
 {
 	unsigned short blockSize = MAX_STORAGE_SIZE;
-	char arr[]="This is the test\n";
+
 	// WRONLY를 빼먹으면 파일 작성이 되지 않는다. 한번 만들어진 파일은 재생성 되지 않음. 
 	if ((fd = open(STORAGE_NAME, O_CREAT|O_RDWR|O_TRUNC, 0755)) < 0)
 	{
@@ -99,8 +102,8 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 		memcpy(&blockSize, &buf[1], 2);
 		if (buf[0] == 'F' || blockSize < arrSize)
 		{
-			//EOF가기 전에 여기서 에러처리를 하게 되어있다! 
-			if (offset + blockSize + arrSize > MAX_STORAGE_SIZE)
+			//EOF의 범위를 넘어가면 exit!!
+			if (offset + blockSize -BUFFER_SIZE + arrSize > MAX_STORAGE_SIZE)
 			{
 				free(arr);
 				perror("There's no storage");
@@ -194,9 +197,3 @@ int RemoveDataByKey(char* key, int keySize)
 	}
 	return 1;
 }
-*/
-// void InitStorage(void)
-// {
-
-// }
-
