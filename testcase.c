@@ -51,7 +51,7 @@ void testcase1(void)
     char* pKey = NULL;
     char* pBuf = NULL;
     char* pTemp = NULL;
-    int i, j;
+    int i, j, c;
 
     printf("=======TestCase1=======\n");
 
@@ -92,9 +92,13 @@ void testcase1(void)
 
             GetDataByKey(pKey, pKeySize, pTemp, pTempSize);
 
-            if(strcmp(pBuf, pTemp) != 0) {
-                printf("TestCase 1: Fail\n");
-                return;
+            for(c = 0;c < pTempSize; ++c)
+            {
+                if (pBuf[c] != pTemp[c])
+                {
+                    printf("TestCase 1: Fail\n");
+                    return ;
+                }
             }
 
             free(pKey);
@@ -205,7 +209,7 @@ void testcase3(void)
     char* pKey = NULL;
     char* pBuf = NULL;
     char* pTemp = NULL;
-    int i, j;
+    int i, j, c;
     int ret;
 
     printf("=======TestCase3=======\n");
@@ -260,9 +264,13 @@ void testcase3(void)
 
             GetDataByKey(pKey, pKeySize, pTemp, pTempSize);
 
-            if(strcmp(pBuf, pTemp) != 0) {
-                printf("TestCase 3: Fail\n");
-                return;
+            for(c = 0;c < pTempSize; ++c)
+            {
+                if (pBuf[c] != pTemp[c])
+                {
+                    printf("TestCase 3: Fail\n");
+                    return ;
+                }
             }
 
             if(-1 == RemoveDataByKey(pKey, pKeySize)) {
@@ -309,9 +317,9 @@ void testcase3(void)
 
             free(pKey);
         }
-
     }
     PrintBlocks();
+
 
     for(i = 0; i < 3; ++i) {
         pKeySize = keySize[i] + 1;
@@ -327,9 +335,13 @@ void testcase3(void)
 
         GetDataByKey(pKey, pKeySize, pTemp, pTempSize);
 
-        if(strcmp(pBuf, pTemp) != 0) {
-            printf("TestCase 3: Fail\n");
-            return;
+        for(c = 0;c < pTempSize; ++c)
+        {
+            if (pBuf[c] != pTemp[c])
+            {
+                printf("TestCase 3: Fail\n");
+                return ;
+            }
         }
 
         if(-1 == RemoveDataByKey(pKey, pKeySize)) {
@@ -356,9 +368,13 @@ void testcase3(void)
 
         GetDataByKey(pKey, pKeySize, pTemp, pTempSize);
 
-        if(strcmp(pBuf, pTemp) != 0) {
-            printf("TestCase 3: Fail\n");
-            return;
+        for(c = 0;c < pTempSize; ++c)
+        {
+            if (pBuf[c] != pTemp[c])
+            {
+                printf("TestCase 3: Fail\n");
+                return ;
+            }
         }
 
         if(-1 == RemoveDataByKey(pKey, pKeySize)) {
@@ -376,6 +392,7 @@ void testcase3(void)
 }
 
 
+
 int main(int argc, char* argv[])
 {
     int tcNum;
@@ -387,11 +404,10 @@ int main(int argc, char* argv[])
     }
 
     tcNum = atoi(argv[1]);
-
+    Init();
     switch(tcNum)
     {
         case 1:
-            Init();
             InitStorage();
             testcase1();
             break;
@@ -406,3 +422,5 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+
