@@ -173,8 +173,7 @@ static void	afterRemove(char *currntBuf, int keySize, int currentBlockSize, int 
 	unsigned short	sum = currentBlockSize;
 
 	// current file offset position is currentBlock offset + HEAD + keySize
-	// ! offset이 0일때도 고려를 해줘야한다.
-	if (offset -(keySize + HEAD + 2) > 0)
+	if (offset - HEAD - keySize - 2 > 0) // current block이 첫 블록이 아니면
 	{
 		offset = lseek(fd, -(keySize + HEAD) - 2, SEEK_CUR);
 		read(fd, bufSize, 2);
@@ -183,10 +182,12 @@ static void	afterRemove(char *currntBuf, int keySize, int currentBlockSize, int 
 		read(fd, frontBuf, HEAD); // front buf stored.
 		offset = lseek(fd, -HEAD + frontBlockSize + currentBlockSize, SEEK_CUR);
 	}
+	else
+		offset = lseek(fd, currentBlockSize - HEAD - keySize, SEEK_CUR);
 	read(fd, tailBuf, HEAD);
 	memcpy(&tailBlockSize, &tailBuf[1], 2);
 	offset = lseek(fd, -HEAD - frontBlockSize - currentBlockSize, SEEK_CUR);
-	if (frontBuf[0] == 'A' && offset > 0)
+	if (frontBuf[0] == 'A' && offset >= 0)
 		sum += frontBlockSize;
 	else
 		offset = lseek(fd, frontBlockSize, SEEK_CUR);

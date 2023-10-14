@@ -48,12 +48,24 @@ int	main(void)
         printf("buf[%d].sizeHead : %d\n", i, buf[i].sizeHead);
         printf("buf[%d].sizeTail : %d\n", i, buf[i].sizeTail);
     }
+    // for (int i = 0; i<4; i++)
+    //     RemoveDataByKey(key[i], keySize[i]);
     if (RemoveDataByKey(key[2], keySize[2]) == 1)
         printf("Remove %s\n", key[2]);
-    RemoveDataByKey(key[1], keySize[1]);
-    RemoveDataByKey(key[3], keySize[3]);
-    if (RemoveDataByKey(key[0], keySize[0]) == 1)
-        printf("Remove %s\n", key[0]);
+    GetBlocks(buf, 100);
+	for (int i = 0; i < 4; i++)
+    {
+        printf("buf[%d].blockState : %c\n", i, buf[i].blockState);
+        printf("buf[%d].blockOffset : %d\n", i, buf[i].blockOffset);
+        printf("buf[%d].keySize : %d\n", i, buf[i].keySize);
+        printf("buf[%d].dataSize : %d\n", i, buf[i].dataSize);
+        printf("buf[%d].sizeHead : %d\n", i, buf[i].sizeHead);
+        printf("buf[%d].sizeTail : %d\n", i, buf[i].sizeTail);
+    }
+    //RemoveDataByKey(key[1], keySize[1]);
+    //RemoveDataByKey(key[3], keySize[3]);
+    //if (RemoveDataByKey(key[0], keySize[0]) == 1)
+    //    printf("Remove %s\n", key[0]);
     return 0;
 }
 
