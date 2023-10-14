@@ -19,7 +19,7 @@ char* data[DATA_SIZE] = { "Hi",
                           "Apple" };
 
 // caution : header에서 extern 으로 선언 하고 여기서 따로 선언해서 사용해야 전역변수로 사용가능.
-int	fd;
+
 int	main(void)
 {
 	char arr[200] = {0};
@@ -48,6 +48,12 @@ int	main(void)
         printf("buf[%d].sizeHead : %d\n", i, buf[i].sizeHead);
         printf("buf[%d].sizeTail : %d\n", i, buf[i].sizeTail);
     }
+    if (RemoveDataByKey(key[2], keySize[2]) == 1)
+        printf("Remove %s\n", key[2]);
+    RemoveDataByKey(key[1], keySize[1]);
+    RemoveDataByKey(key[3], keySize[3]);
+    if (RemoveDataByKey(key[0], keySize[0]) == 1)
+        printf("Remove %s\n", key[0]);
     return 0;
 }
 

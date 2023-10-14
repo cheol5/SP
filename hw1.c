@@ -4,14 +4,15 @@
 
 // !! Write를 하면 자동으로 current File offset이 write다음 바이트로 변경됨.
 
-int fd;
+int 		fd;
+BlockState	State;
 
 int GetBlocks(Block* pBuf, int bufSize)
 {
-	int		i;
-	char	arr[HEAD];
-	int		offset = 0;
-	int		blcokSize;
+	int				i;
+	char			arr[HEAD];
+	int				offset = 0;
+	unsigned short	blcokSize;
 
 	i = 0;
 	offset = lseek(fd, 0, SEEK_SET); //first in fit
@@ -123,15 +124,16 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	return (1);
 }
 
-//성공 시 return값 : 읽은 data의 크기. 실패 시 -1.
+//성공 시 return값 : 읽은 data의 크기. 실패 시 -1
 int GetDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 {
 	char			buf[HEAD];
 	char			*arrOfKey;
 	unsigned short	blockSize;
+	int				offset;
 
-	lseek(fd, 0, SEEK_SET); //first in fit
-	while (read(fd, buf, HEAD))
+	offset = lseek(fd, 0, SEEK_SET); //first in fit
+	while (read(fd, buf, HEAD) && offset < MAX_STORAGE_SIZE)
 	{
 		memcpy(&blockSize, &buf[1], 2);
 		if (keySize == buf[3])
@@ -143,32 +145,67 @@ int GetDataByKey(char* key, int keySize, char* pBuf, int bufSize)
 			{
 				// search 성공
 				free(arrOfKey);
-				// dataSize만큼 할당 후 read하고 cpy.
 				arrOfKey = (char *)malloc(sizeof(char) * buf[4]);
 				if (!arrOfKey)
 					return (0);
 				read(fd, arrOfKey, buf[4]);
 				memcpy(pBuf, arrOfKey, buf[4]);
 				free(arrOfKey);
-				lseek(fd, 0, SEEK_SET); // offset처음으로.
 				return ((int)buf[4]);
 			}
 			free(arrOfKey);
-			lseek(fd, blockSize - HEAD - keySize, SEEK_CUR);
+			offset = lseek(fd, blockSize - HEAD - keySize, SEEK_CUR);
 		}
 		else
-			lseek(fd, blockSize - HEAD, SEEK_CUR);
+			offset = lseek(fd, blockSize - HEAD, SEEK_CUR);
 	}
 	return (-1);
 }
-/*
+
+static void	afterRemove(char *currntBuf, int keySize, int currentBlockSize, int offset)
+{
+	char			frontBuf[HEAD] = {0};
+	char			tailBuf[HEAD] = {0};
+	char			bufSize[2] = {0};
+	char			*newBlock;
+	unsigned short	frontBlockSize = 0;
+	unsigned short	tailBlockSize = 0;
+	unsigned short	sum = currentBlockSize;
+
+	// current file offset position is currentBlock offset + HEAD + keySize
+	// ! offset이 0일때도 고려를 해줘야한다.
+	if (offset -(keySize + HEAD + 2) > 0)
+	{
+		offset = lseek(fd, -(keySize + HEAD) - 2, SEEK_CUR);
+		read(fd, bufSize, 2);
+		memcpy(&frontBlockSize, bufSize, 2);
+		lseek(fd, -frontBlockSize, SEEK_CUR);
+		read(fd, frontBuf, HEAD); // front buf stored.
+		offset = lseek(fd, -HEAD + frontBlockSize + currentBlockSize, SEEK_CUR);
+	}
+	read(fd, tailBuf, HEAD);
+	memcpy(&tailBlockSize, &tailBuf[1], 2);
+	offset = lseek(fd, -HEAD - frontBlockSize - currentBlockSize, SEEK_CUR);
+	if (frontBuf[0] == 'A' && offset > 0)
+		sum += frontBlockSize;
+	else
+		offset = lseek(fd, frontBlockSize, SEEK_CUR);
+	if (tailBuf[0] == 'A')
+		sum += tailBlockSize;
+	leftBlock(sum);
+}
+
+// 삭제 대상이 없으면 -1을 반환. 있으면 1반환
 int RemoveDataByKey(char* key, int keySize)
 {
 	char			buf[HEAD];
 	char			*arrOfKey;
+	char			*arr;
 	unsigned short	blockSize;
+	int				offset;
 
-	while (read(fd, buf, HEAD))
+	offset = lseek(fd, 0, SEEK_SET);
+	while (read(fd, buf, HEAD) && offset < MAX_STORAGE_SIZE)
 	{
 		memcpy(&blockSize, &buf[1], 2);
 		if (keySize == buf[3])
@@ -176,24 +213,17 @@ int RemoveDataByKey(char* key, int keySize)
 			arrOfKey = (char *)malloc(sizeof(char) * keySize + 1);
 			arrOfKey[keySize] = 0;
 			read(fd, arrOfKey, keySize);
-			if(!strcmp(key, arrOfKey)) // return 0이면 같음! 
+			if(!strcmp(key, arrOfKey))
 			{
-				// search!! 앞뒤블럭 탐색 후 합치기 드가자
-				// 근데 하나의 함수에 너무 많은 기능이 있는 것은 좋지 않을 것 같기도 해서 고민중인데 일단은
-				// remove만 작성하려고 함. 
-				lseek(fd, -(keySize + HEAD), SEEK_CUR);
+				afterRemove(buf, keySize, blockSize, offset);
 				free(arrOfKey);
-				arrOfKey = (char *)malloc(sizeof(char) * blockSize);
-				memset(arrOfKey, 0, blockSize);
-				write(fd, arrOfKey, blockSize);
-				lseek(fd, 0, SEEK_SET); // 오프셋 제자리.
-				return 1;
+				return (1);
 			}
 			free(arrOfKey);
-			lseek(fd, blockSize - HEAD - keySize, SEEK_CUR);
+			offset = lseek(fd, blockSize - HEAD - keySize, SEEK_CUR);
 		}
 		else
-			lseek(fd, blockSize - HEAD, SEEK_CUR);
+			offset = lseek(fd, blockSize - HEAD, SEEK_CUR);
 	}
-	return 1;
+	return (-1);
 }
