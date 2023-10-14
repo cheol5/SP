@@ -17,7 +17,7 @@ int GetBlocks(Block* pBuf, int bufSize)
 	i = 0;
 	memset(pBuf, 0, sizeof(Block) * bufSize);
 	offset = lseek(fd, 0, SEEK_SET); //first in fit
-	printf("first offset is %d\n", offset);
+	//printf("first offset is %d\n", offset);
 	while (i < bufSize && offset < MAX_STORAGE_SIZE) 
 	{
 		if (!(read(fd, arr, HEAD)))
@@ -31,7 +31,7 @@ int GetBlocks(Block* pBuf, int bufSize)
 		memcpy(&blcokSize, &arr[1], 2);
 		offset = lseek(fd, blcokSize - HEAD, SEEK_CUR);
 		i++;
-		printf("GetBlock's i is %d, offset : %d\n", i, offset);
+		// printf("GetBlock's i is %d, offset : %d, blockSize : %d\n", i, offset, blcokSize);
 	}
 	return (i);
 }
@@ -206,7 +206,8 @@ int RemoveDataByKey(char* key, int keySize)
 	unsigned short	blockSize;
 	int				offset;
 
-	offset = lseek(fd, 0, SEEK_SET);
+	offset = lseek(fd, 0, SEEK_SET); //first in fit
+	printf("check\n");
 	while (read(fd, buf, HEAD) && offset < MAX_STORAGE_SIZE)
 	{
 		memcpy(&blockSize, &buf[1], 2);

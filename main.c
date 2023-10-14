@@ -41,7 +41,7 @@ int	main(void)
     GetBlocks(buf, 100);
 	for (int i = 0; i < 4; i++)
     {
-        printf("buf[%d].blockState : %c\n", i, buf[i].blockState);
+        printf("buf[%d].blockState : %d\n", i, buf[i].blockState);
         printf("buf[%d].blockOffset : %d\n", i, buf[i].blockOffset);
         printf("buf[%d].keySize : %d\n", i, buf[i].keySize);
         printf("buf[%d].dataSize : %d\n", i, buf[i].dataSize);
@@ -61,7 +61,7 @@ int	main(void)
     GetBlocks(buf, 100);
 	for (int i = 0; i < 4; i++)
     {
-        printf("buf[%d].blockState : %c\n", i, buf[i].blockState);
+        printf("buf[%d].blockState : %d\n", i, buf[i].blockState);
         printf("buf[%d].blockOffset : %d\n", i, buf[i].blockOffset);
         printf("buf[%d].keySize : %d\n", i, buf[i].keySize);
         printf("buf[%d].dataSize : %d\n", i, buf[i].dataSize);

@@ -139,7 +139,10 @@ void testcase2(void)
                 sprintf(pKey, "%s%d%d", key[i % KEY_SIZE], i, j);
                 sprintf(pBuf, "%s%d%d", data[j % DATA_SIZE], i, j);
 
+                printf("Before Re,ove\n");
                 int ret = RemoveDataByKey(pKey, pKeySize);
+                
+                printf("After Re,ove\n");
 
                 if(isRemoved[idx] == 0 && ret == -1) {
                      printf("TestCase 2: Fail\n");

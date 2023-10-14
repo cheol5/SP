@@ -2,12 +2,12 @@
 
 NAME	=	assignment
 CC		=	cc
-SRCS	=	main.c\
+SRCS	=	testcase.c\
 			hw1.c\
 
 
 CFLAG	=	-Wall -Wextra -Werror
-FFLAG	=	-fsanitize=address
+#FFLAG	=	-fsanitize=address
 OBJS	=	$(SRCS:%.c=%.o)
 
 all		:	$(NAME)
