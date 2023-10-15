@@ -43,7 +43,8 @@ void Init(void)
 
 void InitStorage(void)
 {
-	unsigned short blockSize = MAX_STORAGE_SIZE;
+	unsigned short	blockSize = MAX_STORAGE_SIZE;
+	char			blockState = FREE_BLOCK;
 
 	// WRONLY를 빼먹으면 파일 작성이 되지 않는다. 한번 만들어진 파일은 재생성 되지 않음. 
 	if ((fd = open(STORAGE_NAME, O_CREAT|O_RDWR|O_TRUNC, 0755)) < 0)
@@ -56,7 +57,7 @@ void InitStorage(void)
 		perror("truncate error is occurd\n");
 		exit(1);
 	}
-	write(fd, "A", 1);
+	write(fd, &blockState, 1);
 	write(fd, &blockSize, 2);
 	lseek(fd, -2, SEEK_END);
 	write(fd, &blockSize, 2);
@@ -66,10 +67,11 @@ void InitStorage(void)
 static void	leftBlock(unsigned short leftBlockSize)
 {
 	char	*leftBlock;
+	char	blockState = FREE_BLOCK;
 
 	leftBlock = (char *)malloc(leftBlockSize);
 	memset(leftBlock, 0, leftBlockSize);
-	memcpy(leftBlock, "A", 1);
+	memcpy(leftBlock, &blockState, 1);
 	memcpy(&leftBlock[1], &leftBlockSize, 2);
 	memcpy(&leftBlock[leftBlockSize - 2], &leftBlockSize, 2);
 	write(fd, leftBlock, leftBlockSize);
@@ -91,7 +93,7 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	if (!arr)
 		return (0);
 	memset(arr, 0, arrSize);
-	arr[0] = 'F';
+	arr[0] = ALLOC_BLOCK;
 	memcpy(&arr[1], &arrSize, 2);
 	memcpy(&arr[1 + 2], &keySize, 1);
 	memcpy(&arr[1 + 2 + 1], &bufSize, 1);
@@ -102,7 +104,7 @@ int InsertData(char* key, int keySize, char* pBuf, int bufSize)
 	while (read(fd, buf, BUFFER_SIZE))
 	{
 		memcpy(&blockSize, &buf[1], 2);
-		if (buf[0] == 'F' || blockSize < arrSize)
+		if (buf[0] == ALLOC_BLOCK || blockSize < arrSize)
 		{
 			//EOF의 범위를 넘어가면 exit!!
 			if (offset + blockSize -BUFFER_SIZE + arrSize > MAX_STORAGE_SIZE)
@@ -188,11 +190,11 @@ static void	afterRemove(char *currntBuf, int keySize, int currentBlockSize, int 
 	read(fd, tailBuf, HEAD);
 	memcpy(&tailBlockSize, &tailBuf[1], 2);
 	offset = lseek(fd, -HEAD - frontBlockSize - currentBlockSize, SEEK_CUR);
-	if (frontBuf[0] == 'A' && offset >= 0)
+	if (frontBuf[0] == FREE_BLOCK && offset >= 0)
 		sum += frontBlockSize;
 	else
 		offset = lseek(fd, frontBlockSize, SEEK_CUR);
-	if (tailBuf[0] == 'A')
+	if (tailBuf[0] == FREE_BLOCK)
 		sum += tailBlockSize;
 	leftBlock(sum);
 }
