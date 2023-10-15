@@ -1,7 +1,7 @@
 # Simple makefile.
 
 NAME	=	hw1
-CC		=	cc
+CC		=	gcc
 SRCS	=	testcase.c\
 			hw1.c\
 

@@ -10,6 +10,7 @@ typedef enum __BlockState{
     ALLOC_BLOCK = 1
 } BlockState;
 
+
 typedef struct __Block {
     int blockOffset;
     int blockState;
@@ -19,11 +20,13 @@ typedef struct __Block {
     int dataSize;
 } Block;
 
+
 extern void Init(void);
 extern int InsertData(char* key, int keySize, char* pBuf, int bufSize);
 extern int GetDataByKey(char* key, int keySize, char* pBuf, int bufSize);
 extern int RemoveDataByKey(char* key, int keySize);
 extern void InitStorage(void);
 extern int GetBlocks(Block* pBuf, int bufSize);
+
 
 #endif
