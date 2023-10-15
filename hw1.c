@@ -206,8 +206,8 @@ int RemoveDataByKey(char* key, int keySize)
 	unsigned short	blockSize;
 	int				offset;
 
+	fd = open(STORAGE_NAME, O_RDWR, 0777);
 	offset = lseek(fd, 0, SEEK_SET); //first in fit
-	printf("check\n");
 	while (read(fd, buf, HEAD) && offset < MAX_STORAGE_SIZE)
 	{
 		memcpy(&blockSize, &buf[1], 2);

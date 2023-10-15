@@ -1,13 +1,13 @@
 # Simple makefile.
 
-NAME	=	assignment
+NAME	=	hw1
 CC		=	cc
 SRCS	=	testcase.c\
 			hw1.c\
 
 
 CFLAG	=	-Wall -Wextra -Werror
-#FFLAG	=	-fsanitize=address
+DFLAG	=	-g
 OBJS	=	$(SRCS:%.c=%.o)
 
 all		:	$(NAME)
@@ -31,4 +31,9 @@ re		:
 	make fclean
 	make all
 
-.PHONY	: all clean fclean re
+debug	:
+	make fclean
+	gcc -g $(SRCS)
+	lldb a.out
+
+.PHONY	: all clean fclean re debug
