@@ -5,8 +5,7 @@ CC		=	cc
 SRCS	=	testcase.c\
 			hw1.c\
 
-
-CFLAG	=	-Wall -Wextra -Werror
+#CFLAG	=	-Wall -Wextra -Werror
 DFLAG	=	-g
 OBJS	=	$(SRCS:%.c=%.o)
 
@@ -14,10 +13,10 @@ all		:	$(NAME)
 	make clean
 
 $(NAME)	:	$(OBJS)
-	$(CC) $(FFLAG) -o $@ $^
+	$(CC) -o $@ $^
 
 %.o		:	%.c
-	$(CC) $(FFLAG) -c $< -o $@
+	$(CC) -c $< -o $@
 
 clean	:
 	rm -rf $(OBJS)
