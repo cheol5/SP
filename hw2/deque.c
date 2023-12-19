@@ -1,5 +1,13 @@
 #include "deque.h"
 
+int	is_empty(t_deque *deque)
+{
+	if (deque->cnt == 0)
+		return (1);
+	return (0);
+}
+
+
 void	append(t_deque *deque, Thread data)
 {
 	t_node	*node;
@@ -43,7 +51,7 @@ Thread	pop_left(t_deque *deque)
 	return (data);
 }
 
-void	append_left(t_deque *deque, Thread data)
+void	append_left(t_deque *deque, Thread *data)
 {
 	t_node	*node;
 
