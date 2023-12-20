@@ -23,5 +23,8 @@ Thread	*pop_left(t_deque *deque);
 void	append_left(t_deque *deque, Thread *data);
 Thread	*pop(t_deque *deque);
 
+// deque
+extern t_deque readyQueue;
+extern t_deque waitQueue;
 
 #endif

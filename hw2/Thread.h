@@ -40,10 +40,6 @@ typedef struct __wrapperArg {
     Thread*      pThread;
 } WrapperArg;
 
-// deque
-extern t_deque readyQueue;
-extern t_deque waitQueue;
-
 /* head and tail pointers for ready queue */
 extern Thread*     ReadyQHead;
 extern Thread*     ReadyQTail;

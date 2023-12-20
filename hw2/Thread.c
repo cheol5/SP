@@ -76,8 +76,9 @@ int 	thread_suspend(thread_t tid)
 		node->prev->next = node->next;
 		node->next->prev = node->prev;
 		data = node->data;
+		data->status = THREAD_STATUS_BLOCKED; // Change status.
 		free(node);
-		waitQueue.append_left(&waitQueue, data);
+		append_left(&waitQueue, data);
 		return 0;
 	}
 	return -1;
@@ -93,8 +94,9 @@ int	thread_resume(thread_t tid)
 		node->prev->next = node->next;
 		node->next->prev = node->prev;
 		data = node->data;
+		data->status = THREAD_STATUS_READY;
 		free(node);
-		readyQueue.append_left(&readyQueue, data);
+		append_left(&readyQueue, data);
 		return 0;
 	}
 	return -1;
