@@ -23,13 +23,11 @@ int		RunScheduler( void )
 void __thread_to_ready(int signo) {
     Thread *pTh = pop(&readyQueue);
 	pTh->bRunnable = FALSE;
+	append_left(&readyQueue, pTh);
     pthread_mutex_lock(&(pTh->readyMutex));
     while (pTh->bRunnable == FALSE)
         pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
     pthread_mutex_unlock(&(pTh->readyMutex));
-
-    // tail에 다시 붙여준다. 스케쥴러가 하게 할까
-	append_left(&readyQueue, pTh);
 }
 
 void __thread_to_run(Thread* pTh)
