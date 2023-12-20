@@ -17,19 +17,19 @@ pthread_cond_t readyCond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t zombieCond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t zombieMutex = PTHREAD_MUTEX_INITIALIZER;
 
-void tcbBlockInit(Thread *block)
+static void tcbBlockInit(Thread *block)
 {
 	block->status = THREAD_STATUS_READY;
 	block->readyCond = readyCond;
 	block->bRunnable = 0;
 	block->readyMutex = readyMutex;
-	block->parentTid = pthread_self();
+	block->parentTid = pthread_self(); // pthread_create호출 전이므로 parent's tid 가 들어간다. 
 	block->zombieCond = zombieCond;
 	block->zombieMutex = zombieMutex;
 	block->bZombie = 1;
 }
 
-void *wrapperFunc(void *arg){
+static void *wrapperFunc(void *arg){
 	WrapperArg *pArg = (WrapperArg *)arg;
 	Thread *pTh = pArg->pThread;
 	pTh->tid = pthread_self();
@@ -37,6 +37,8 @@ void *wrapperFunc(void *arg){
 	_thread_to_ready2(pTh); // 생성된 쓰레드를 최초 1회 ready2함수를 호출한다. 
 	return pArg->funcPtr(pArg->funcArg);
 }
+
+
 
 int 	thread_create(thread_t *thread, thread_attr_t *attr, void *(*start_routine) (void *), void *arg)
 {
@@ -52,25 +54,24 @@ int 	thread_create(thread_t *thread, thread_attr_t *attr, void *(*start_routine)
 	return 0;
 }
 
-t_node *findTcbBlock(thread_t tid){
-	t_node *node = readyQueue.top;
-	while (node){
-		if (node->data->tid == tid)
-			return node;
-		node = node->next;
-	}
+int 	thread_join(thread_t thread, void **retval)
+{
+	t_node *node = findTcbBlock(thread, &readyQueue);
+	if (!node)
+		node = findTcbBlock(thread, &waitQueue);
+	Thread *tcb = node->data;
+
+	pthread_mutex_lock(&(tcb->zombieMutex));
+	while (tcb->bZombie == FALSE)
+		pthread_cond_wait(&(tcb->zombieCond), &(tcb->zombieMutex));
+	pthread_mutex_unlock(&(tcb->zombieMutex));
+	thread_exit(*retval);
 	return 0;
 }
 
-int 	thread_join(thread_t thread, void **retval)
-{
-	
-}
-
-
 int 	thread_suspend(thread_t tid)
 {
-	t_node *node = findTcbBlock(tid);
+	t_node *node = findTcbBlock(tid, &readyQueue);
 	Thread *data;
 	if (!node)
 	{
@@ -85,10 +86,9 @@ int 	thread_suspend(thread_t tid)
 	return -1;
 }
 
-
 int	thread_resume(thread_t tid)
 {
-	t_node *node = findTcbBlock(tid);
+	t_node *node = findTcbBlock(tid, &waitQueue);
 	Thread *data;
 	if (!node)
 	{

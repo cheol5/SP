@@ -8,14 +8,6 @@ int		RunScheduler( void )
 {
 }
 
-void __thread_to_ready2(Thread *pTh)
-{
-	pthread_mutex_lock(&(pTh->readyMutex));
-	while (pTh->bRunnable == FALSE)
-		pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
-	pthread_mutex_unlock(&(pTh->readyMutex));
-}
-
 // time slice만큼 동작이 끝난 쓰레드를 테일에 붙여주는 함수.
 void __thread_to_ready(int signo) {
     Thread *pTh = pop(&readyQueue);

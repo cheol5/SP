@@ -8,6 +8,8 @@
 #include "Init.h"
 #include "Scheduler.h"
 #include "Thread.h"
+#include "signal.h"
+#include "deque.h"
 
 
 void main(int argc, char* argv[])

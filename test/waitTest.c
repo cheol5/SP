@@ -1,10 +1,9 @@
 # include "dmddo.h"
 
+int myNum = 10;
+
 int main()
 {
-	if (fork() == 0)
-		execl("/usr/bin/cp", "cp", "foo", "bar", 0);
-	wait(0);
-	printf("cpy!! \n");
-	exit(0);
+	printf("%d\n", myNum);
+	foo();
 }

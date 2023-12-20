@@ -2,8 +2,6 @@
 #define __THREAD_H__
 
 #include <pthread.h>
-#define TRUE 1
-#define FALSE 0
 
 #define TIMESLICE   (1)
 

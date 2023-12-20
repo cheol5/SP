@@ -5,4 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+extern int myNum;
+void foo(void);
+
 #endif
