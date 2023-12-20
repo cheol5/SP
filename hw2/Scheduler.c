@@ -2,7 +2,7 @@
 #include "Thread.h"
 #include "Scheduler.h"
 #include "signal.h"
-
+#include "deque.c"
 
 int		RunScheduler( void )
 {
@@ -16,15 +16,16 @@ void __thread_to_ready2(Thread *pTh)
 	pthread_mutex_unlock(&(pTh->readyMutex));
 }
 
+// time slice만큼 동작이 끝난 쓰레드를 테일에 붙여주는 함수.
 void __thread_to_ready(int signo) {
-    Thread *pTh = readyQueue.pop(readyQueue); // deque에서 찾아서 head의 thread를 부여한다. 
+    Thread *pTh = pop(&readyQueue);
     pthread_mutex_lock(&(pTh->readyMutex));
     while (pTh->bRunnable == FALSE)
         pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
     pthread_mutex_unlock(&(pTh->readyMutex));
 
-    // deque처리
-	readyQueue.append_left(&readyQueue, pTh);
+    // tail에 다시 붙여준다.
+	append_left(&readyQueue, pTh);
 }
 
 void __thread_to_run(Thread* pTh)
