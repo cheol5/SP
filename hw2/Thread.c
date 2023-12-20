@@ -17,10 +17,9 @@ pthread_cond_t readyCond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t zombieCond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t zombieMutex = PTHREAD_MUTEX_INITIALIZER;
 
-void tcbBlockInit(Thread *block, thread_t *tid)
+void tcbBlockInit(Thread *block)
 {
 	block->status = THREAD_STATUS_READY;
-	block->tid = *tid;
 	block->readyCond = readyCond;
 	block->bRunnable = 0;
 	block->readyMutex = readyMutex;
@@ -30,16 +29,25 @@ void tcbBlockInit(Thread *block, thread_t *tid)
 	block->bZombie = 1;
 }
 
+void *wrapperFunc(void *arg){
+	WrapperArg *pArg = (WrapperArg *)arg;
+	Thread *pTh = pArg->pThread;
+	pTh->tid = pthread_self();
+	_thread_to_ready2(pTh); // 생성된 쓰레드를 최초 1회 ready2함수를 호출한다. 
+	return pArg->funcPtr(pArg->funcArg);
+}
+
 int 	thread_create(thread_t *thread, thread_attr_t *attr, void *(*start_routine) (void *), void *arg)
 {
 	//tcb 생성해야함.
 	Thread tcbBlock;
 	WrapperArg args;
+
+	tcbBlockInit(&tcbBlock);
 	args.funcPtr = start_routine;
 	args.funcArg = arg;
-	args.pThread = pthread_self();
-	pthread_create(thread, 0, start_routine, arg);
-	tcbBlockInit(&tcbBlock, thread);
+	args.pThread = &tcbBlock;
+	pthread_create(thread, 0, wrapperFunc, &args);
 	return 0;
 }
 
@@ -55,7 +63,7 @@ t_node *findTcbBlock(thread_t tid){
 
 int 	thread_join(thread_t thread, void **retval)
 {
-
+	
 }
 
 
@@ -97,7 +105,6 @@ int             thread_exit(void* retval)
 	pthread_exit(retval);
 	return 0;
 }
-
 
 thread_t	thread_self()
 {

@@ -8,6 +8,14 @@ int		RunScheduler( void )
 {
 }
 
+void __thread_to_ready2(Thread *pTh)
+{
+	pthread_mutex_lock(&(pTh->readyMutex));
+	while (pTh->bRunnable == FALSE)
+		pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
+	pthread_mutex_unlock(&(pTh->readyMutex));
+}
+
 void __thread_to_ready(int signo) {
     Thread *pTh = readyQueue.pop(readyQueue); // deque에서 찾아서 head의 thread를 부여한다. 
     pthread_mutex_lock(&(pTh->readyMutex));
