@@ -33,6 +33,7 @@ void *wrapperFunc(void *arg){
 	WrapperArg *pArg = (WrapperArg *)arg;
 	Thread *pTh = pArg->pThread;
 	pTh->tid = pthread_self();
+	append_left(&readyQueue, pTh); // ready queue에 삽입.
 	_thread_to_ready2(pTh); // 생성된 쓰레드를 최초 1회 ready2함수를 호출한다. 
 	return pArg->funcPtr(pArg->funcArg);
 }
