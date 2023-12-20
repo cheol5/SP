@@ -56,16 +56,15 @@ int 	thread_create(thread_t *thread, thread_attr_t *attr, void *(*start_routine)
 
 int 	thread_join(thread_t thread, void **retval)
 {
-	t_node *node = findTcbBlock(thread, &readyQueue);
-	if (!node)
-		node = findTcbBlock(thread, &waitQueue);
+	t_node *node = getTcbBlock(thread);
 	Thread *tcb = node->data;
 
 	pthread_mutex_lock(&(tcb->zombieMutex));
 	while (tcb->bZombie == FALSE)
 		pthread_cond_wait(&(tcb->zombieCond), &(tcb->zombieMutex));
 	pthread_mutex_unlock(&(tcb->zombieMutex));
-	thread_exit(*retval);
+	// thread_exit(*retval);
+	*retval = tcb->pExitCode;
 	return 0;
 }
 
@@ -105,7 +104,10 @@ int	thread_resume(thread_t tid)
 
 int             thread_exit(void* retval)
 {
-	pthread_exit(retval);
+	__thread_to_zombie(pthread_self());
+	t_node *node = getTcbBlock(pthread_self());
+	Thread *data = node->data;
+	data->pExitCode = retval;
 	return 0;
 }
 

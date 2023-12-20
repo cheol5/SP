@@ -113,11 +113,17 @@ void __thread_to_ready2(Thread *pTh)
 	pthread_mutex_unlock(&(pTh->readyMutex));
 }
 
-void __thread_to_zombie(thread_t tid)
+t_node *getTcbBlock(thread_t tid)
 {
 	t_node *node = findTcbBlock(tid, &readyQueue);
 	if (!node)
 		node = findTcbBlock(tid, &waitQueue);
+	return node;
+}
+
+void __thread_to_zombie(thread_t tid)
+{
+	t_node *node = getTcbBlock(tid);
 	Thread *tcb = node->data;
 	tcb->status = THREAD_STATUS_ZOMBIE; // change status
 
