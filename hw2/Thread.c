@@ -3,6 +3,9 @@
 #include "Scheduler.h"
 #include "deque.h"
 
+t_deque		readyQueue = {0};
+t_deque		waitQueue = {0};
+
 Thread*     ReadyQHead = NULL;
 Thread*     ReadyQTail = NULL;
 
@@ -59,9 +62,13 @@ int	thread_resume(thread_t tid)
 }
 
 int             thread_exit(void* retval)
+{
+	pthread_exit(retval);
+	return 0;
+}
 
 
 thread_t	thread_self()
 {
 	return pthread_self();
-}	
+}

@@ -8,7 +8,7 @@ int	is_empty(t_deque *deque)
 }
 
 
-void	append(t_deque *deque, Thread data)
+void	append(t_deque *deque, Thread *data)
 {
 	t_node	*node;
 
@@ -27,13 +27,13 @@ void	append(t_deque *deque, Thread data)
 	deque->cnt++;
 }
 
-Thread	pop_left(t_deque *deque)
+Thread	*pop_left(t_deque *deque)
 {
 	t_node	*ptr;
-	Thread	data;
+	Thread	*data;
 
 	if (is_empty(deque))
-		print_emsg("Error\n");
+		exit(1);
 	ptr = deque->top;
 	data = ptr->data;
 	if (deque->cnt == 1)
@@ -70,13 +70,13 @@ void	append_left(t_deque *deque, Thread *data)
 	deque->cnt++;
 }
 
-Thread	pop(t_deque *deque)
+Thread	*pop(t_deque *deque)
 {
 	t_node	*ptr;
-	Thread	data;
+	Thread	*data;
 
 	if (is_empty(deque))
-		print_emsg("Error\n");
+		exit(1);
 	ptr = deque->bottom;
 	data = ptr->data;
 	if (deque->cnt == 1)

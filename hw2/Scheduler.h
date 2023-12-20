@@ -4,5 +4,7 @@
 
 int		RunScheduler( void );
 void            	__ContextSwitch(Thread* pCurThread, Thread* pNewThread);
+void __thread_to_run(Thread* pTh);
+void __thread_to_ready(int signo);
 
 #endif

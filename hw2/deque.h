@@ -1,7 +1,7 @@
 #ifndef DEQUE_H
 #define DEQUE_H
 
-# include "Thread.h"
+#include "Thread.h"
 
 typedef struct node
 {
@@ -19,9 +19,9 @@ typedef struct deque
 
 int		is_empty(t_deque *deque);
 void	append(t_deque *deque, Thread data);
-Thread	pop_left(t_deque *deque);
+Thread	*pop_left(t_deque *deque);
 void	append_left(t_deque *deque, Thread data);
-Thread	pop(t_deque *deque);
+Thread	*pop(t_deque *deque);
 
 
 #endif
