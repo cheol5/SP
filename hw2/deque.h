@@ -18,9 +18,9 @@ typedef struct deque
 }			t_deque;
 
 int		is_empty(t_deque *deque);
-void	append(t_deque *deque, Thread data);
+void	append(t_deque *deque, Thread *data);
 Thread	*pop_left(t_deque *deque);
-void	append_left(t_deque *deque, Thread data);
+void	append_left(t_deque *deque, Thread *data);
 Thread	*pop(t_deque *deque);
 
 

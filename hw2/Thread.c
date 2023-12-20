@@ -43,6 +43,15 @@ int 	thread_create(thread_t *thread, thread_attr_t *attr, void *(*start_routine)
 	return 0;
 }
 
+t_node *findTcbBlock(thread_t tid){
+	t_node *node = readyQueue.top;
+	while (node){
+		if (node->data->tid == tid)
+			return node;
+		node = node->next;
+	}
+	return 0;
+}
 
 int 	thread_join(thread_t thread, void **retval)
 {
@@ -52,13 +61,35 @@ int 	thread_join(thread_t thread, void **retval)
 
 int 	thread_suspend(thread_t tid)
 {
-
+	t_node *node = findTcbBlock(tid);
+	Thread *data;
+	if (!node)
+	{
+		node->prev->next = node->next;
+		node->next->prev = node->prev;
+		data = node->data;
+		free(node);
+		waitQueue.append_left(&waitQueue, data);
+		return 0;
+	}
+	return -1;
 }
 
 
 int	thread_resume(thread_t tid)
 {
-
+	t_node *node = findTcbBlock(tid);
+	Thread *data;
+	if (!node)
+	{
+		node->prev->next = node->next;
+		node->next->prev = node->prev;
+		data = node->data;
+		free(node);
+		readyQueue.append_left(&readyQueue, data);
+		return 0;
+	}
+	return -1;
 }
 
 int             thread_exit(void* retval)

@@ -16,7 +16,7 @@ void __thread_to_ready(int signo) {
     pthread_mutex_unlock(&(pTh->readyMutex));
 
     // deque처리
-	readyQueue.append_left(readyQueue, pTh);
+	readyQueue.append_left(&readyQueue, pTh);
 }
 
 void __thread_to_run(Thread* pTh)
