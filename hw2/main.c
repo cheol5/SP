@@ -3,13 +3,11 @@
 
 #include "TestCase1.h"
 #include "TestCase2.h"
-//#include "TestCase3.h"
+#include "TestCase3.h"
 
 #include "Init.h"
 #include "Scheduler.h"
 #include "Thread.h"
-#include "signal.h"
-#include "deque.h"
 
 
 void main(int argc, char* argv[])
@@ -17,13 +15,13 @@ void main(int argc, char* argv[])
     int TcNum;
     thread_t tid1,tid2,tid3,tid4;
 
-    signal(SIGUSR1, __thread_to_ready);
-
     if(argc != 2)
     {
         perror("Input TestCase Number!");
         exit(0);
     }
+
+    Init(  );
 
     TcNum = atoi(argv[1]);
 
@@ -35,15 +33,11 @@ void main(int argc, char* argv[])
         case 2:
             thread_create(&tid2, NULL, (void*)TestCase2, 0);
             break;
-/*
         case 3:
             thread_create(&tid3, NULL, (void*)TestCase3, 0);
             break;
-*/
     }
 
     RunScheduler();
-    while(1){
-
-    }
+    while(1){}
 }

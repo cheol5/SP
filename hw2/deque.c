@@ -109,12 +109,30 @@ void __thread_to_ready2(Thread *pTh)
 {
 	pthread_mutex_lock(&(pTh->readyMutex));
 	while (pTh->bRunnable == FALSE)
-	{
-		printf("처음 시작했을 때 잠든다.\n");
 		pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
-	}
-	printf("%d 잠에서 깬다.\n", (int)currentTcb->tid);
 	pthread_mutex_unlock(&(pTh->readyMutex));
+}
+
+Thread *removeTcbBlock(thread_t tid, t_deque *queue)
+{
+	t_node *node = getTcbBlock(tid);
+	Thread *data;
+	if (node)
+	{
+		if (!node->prev)
+			return pop_left(queue);
+		if (!node->next)
+			return pop(queue);
+		//가운데에 있는 케이스
+		data = node->data;
+		queue->cnt--;
+		node->prev->next = node->next;
+		node->next->prev = node->prev;
+		data->status = THREAD_STATUS_BLOCKED; // Change status.
+		free(node);
+		return data;
+	}
+	return 0;
 }
 
 t_node *getTcbBlock(thread_t tid)
@@ -130,9 +148,26 @@ void __thread_to_zombie(thread_t tid)
 	t_node *node = getTcbBlock(tid);
 	Thread *tcb = node->data;
 	tcb->status = THREAD_STATUS_ZOMBIE; // change status
-
+	
 	pthread_mutex_lock(&(tcb->zombieMutex));
-	tcb->bZombie == TRUE;
+	tcb->bZombie = TRUE;
 	pthread_cond_signal(&(tcb->zombieCond));
 	pthread_mutex_unlock(&(tcb->zombieMutex));
+}
+
+// time slice만큼 동작이 끝난 쓰레드를 ready상태로 만들어주는 함수
+void __thread_to_ready(int signo) {
+    Thread *pTh = currentTcb;
+    pthread_mutex_lock(&(pTh->readyMutex));
+    while (pTh->bRunnable == FALSE)
+        pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
+    pthread_mutex_unlock(&(pTh->readyMutex));
+}
+
+void __thread_to_run(Thread* pTh)
+{
+	pthread_mutex_lock(&(pTh->readyMutex));
+	pTh->bRunnable = TRUE;
+	pthread_cond_signal(&(pTh->readyCond));
+	pthread_mutex_unlock(&(pTh->readyMutex));
 }

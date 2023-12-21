@@ -8,6 +8,8 @@ SRCS	=	main.c\
 			deque.c\
 			TestCase1.c\
 			TestCase2.c\
+			init.c\
+			TestCase3\
 
 #CFLAG	=	-Wall -Wextra -Werror
 DFLAG	=	-g
