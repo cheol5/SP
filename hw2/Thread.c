@@ -17,6 +17,15 @@ pthread_cond_t readyCond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t zombieCond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t zombieMutex = PTHREAD_MUTEX_INITIALIZER;
 int joinCnt = 0;
+//mini Test
+	// printf("thread id is %d, parent :%d\n", (int)pTh->tid, (int)pTh->parentTid);
+	// printf("ready queue size: %d\n", readyQueue.cnt);
+	// t_node *node = readyQueue.top;
+	// while (node)
+	// {
+	// 	printf("traversal tid :%d\n", (int)(node->data->tid));
+	// 	node = node->next;
+	// }
 
 static void tcbBlockInit(Thread *block)
 {
@@ -37,15 +46,7 @@ static void *wrapperFunc(void *argT)
 	WrapperArg *pArg = (WrapperArg *)argT;
 	Thread *pTh = pArg->pThread;
 	pTh->tid = pthread_self();
-	// printf("thread id is %d, parent :%d\n", (int)pTh->tid, (int)pTh->parentTid);
 	append_left(&readyQueue, pTh); // ready queue에 삽입.
-	// printf("ready queue size: %d\n", readyQueue.cnt);
-	// t_node *node = readyQueue.top;
-	// while (node)
-	// {
-	// 	printf("traversal tid :%d\n", (int)(node->data->tid));
-	// 	node = node->next;
-	// }
 	__thread_to_ready2(pTh); // 생성된 쓰레드를 최초 1회 ready2함수를 호출한다. 
 	return pArg->funcPtr(pArg->funcArg);
 	// free(argT);
@@ -101,63 +102,32 @@ int 	thread_suspend(thread_t tid)
 {
 	t_node *node = findTcbBlock(tid, &readyQueue);
 	Thread *data;
-	if (node)
+	pthread_mutex_lock(&readyQueueMutex);
+	if (node == readyQueue.bottom)
 	{
-		// 맨 앞
-		if (!node->prev)
-		{
-			data = pop_left(&readyQueue);
-			append_left(&waitQueue, data);
-			return 0;
-		}
-		// 맨 뒤
-		if (!node->next)
-		{
-			data = pop(&readyQueue);
-			append_left(&waitQueue, data);
-			return 0;
-		}
-		//가운데에 있는 케이스
-		data = node->data;
-		node->prev->next = node->next;
-		node->next->prev = node->prev;
-		readyQueue.cnt--;
-		data->status = THREAD_STATUS_BLOCKED; // Change status.
-		free(node);
-		append_left(&waitQueue, data);
-		return 0;
+		data = removeTcbBlock(tid, &readyQueue);
+		__thread_to_run(readyQueue.bottom->data);
 	}
-	return -1;
+	else
+		data = removeTcbBlock(tid, &readyQueue);
+	pthread_mutex_unlock(&readyQueueMutex);
+	data->status = THREAD_STATUS_BLOCKED; // Change status.
+	append_left(&waitQueue, data);
+	waitQappendLeft(data);
+	return 0;
 }
 
 int	thread_resume(thread_t tid)
 {
+	pthread_mutex_lock(&waitQueueMutex);
 	t_node *node = findTcbBlock(tid, &waitQueue);
-	Thread *data;
-	if (node)
-	{
-		if (!node->prev)
-		{
-			data = pop_left(&waitQueue);
-			append_left(&readyQueue, data);
-			return 0;
-		}
-		if (!node->next)
-		{
-			data = pop(&waitQueue);
-			append_left(&readyQueue, data);
-			return 0;
-		}
-		//가운데에 있는 케이스
-		data = node->data;
-		node->prev->next = node->next;
-		node->next->prev = node->prev;
-		data->status = THREAD_STATUS_BLOCKED; // Change status.
-		free(node);
-		append_left(&readyQueue, data);
-		return 0;
-	}
-	return -1;
+	Thread *data = removeTcbBlock(tid, &waitQueue);
+	pthread_mutex_unlock(&waitQueueMutex);
+	data->status = THREAD_STATUS_READY; // Change status.
+	pthread_mutex_lock(&readyQueueMutex);
+	append_left(&readyQueue, data);
+	pthread_mutex_unlock(&readyQueueMutex);
+	return 0;
 }
 
 int             thread_exit(void* retval)

@@ -37,6 +37,8 @@ void __thread_to_zombie(thread_t tid);
 t_node *findTcbBlock(thread_t tid, t_deque *deque);
 t_node *getTcbBlock(thread_t tid);
 Thread *removeTcbBlock(thread_t tid, t_deque *queue);
+void QueueInit();
+void	waitQappendLeft(Thread *data);
 
 // deque
 extern t_deque readyQueue;

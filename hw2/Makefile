@@ -6,10 +6,10 @@ SRCS	=	main.c\
 			Scheduler.c\
 			Thread.c\
 			deque.c\
+			init.c\
 			TestCase1.c\
 			TestCase2.c\
-			init.c\
-			TestCase3\
+			TestCase3.c\
 
 #CFLAG	=	-Wall -Wextra -Werror
 DFLAG	=	-g

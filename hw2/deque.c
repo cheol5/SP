@@ -33,7 +33,7 @@ Thread	*pop_left(t_deque *deque)
 	Thread	*data;
 
 	if (is_empty(deque))
-		exit(1);
+		return 0;
 	ptr = deque->top;
 	data = ptr->data;
 	if (deque->cnt == 1)
@@ -76,7 +76,7 @@ Thread	*pop(t_deque *deque)
 	Thread	*data;
 
 	if (is_empty(deque))
-		exit(1);
+		return 0;
 	ptr = deque->bottom;
 	data = ptr->data;
 	if (deque->cnt == 1)
@@ -128,7 +128,6 @@ Thread *removeTcbBlock(thread_t tid, t_deque *queue)
 		queue->cnt--;
 		node->prev->next = node->next;
 		node->next->prev = node->prev;
-		data->status = THREAD_STATUS_BLOCKED; // Change status.
 		free(node);
 		return data;
 	}
@@ -170,4 +169,27 @@ void __thread_to_run(Thread* pTh)
 	pTh->bRunnable = TRUE;
 	pthread_cond_signal(&(pTh->readyCond));
 	pthread_mutex_unlock(&(pTh->readyMutex));
+}
+
+void QueueInit(){
+	WaitQHead = waitQueue.bottom->data;
+	WaitQTail = waitQueue.top->data;
+	ReadyQHead = readyQueue.bottom->data;
+	ReadyQTail = readyQueue.top->data;
+}
+
+void	waitQappendLeft(Thread *data)
+{
+	if (WaitQHead)
+	{
+		WaitQHead->pPrev = data;
+		data->pNext = WaitQHead;
+	}
+	else
+	{
+		data->pNext = 0;
+		data->pPrev = 0;
+		WaitQTail = data;
+	}
+	WaitQHead = data;
 }
