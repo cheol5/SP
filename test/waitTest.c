@@ -2,19 +2,30 @@
 
 int myNum = 10;
 
-void signalTest(int signo)
+void *signalTest(void *args)
 {
-	printf("calling signal\n");
+	while (1){
+	printf("child tid :%ld\n", pthread_self());
+	sleep(2);
+	}
+}
+
+void caller(int signo){
+	printf("clclcl\n");
 }
 
 int main()
 {
-	signal(SIGINT, signalTest);
+	signal(SIGUSR1, caller);
 	printf("%d\n", myNum);
 	foo();
-	while(1)
-	{
-		signalTest(0);
-		sleep(2);
+
+	pthread_t tid;
+	pthread_create(&tid, 0, signalTest, 0);
+	while(1){
+	pthread_kill(tid, SIGUSR1);
+	sleep(2);
 	}
+	pthread_join(tid, 0);
+	// printf("main : %ld\nand child :%ld", pthread_self(), tid);
 }

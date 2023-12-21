@@ -25,8 +25,6 @@ void main(int argc, char* argv[])
         exit(0);
     }
 
-    Init(  );
-
     TcNum = atoi(argv[1]);
 
     switch(TcNum)
@@ -45,5 +43,7 @@ void main(int argc, char* argv[])
     }
 
     RunScheduler();
-    while(1){}
+    while(1){
+
+    }
 }

@@ -11,13 +11,14 @@ SRCS	=	main.c\
 
 #CFLAG	=	-Wall -Wextra -Werror
 DFLAG	=	-g
+FFLAG	=	-fsanitize=address
 OBJS	=	$(SRCS:%.c=%.o)
 
 all		:	$(NAME)
 	make clean
 
 $(NAME)	:	$(OBJS)
-	$(CC) -o $@ $^
+	$(CC) $(FFLAG) -o $@ $^
 
 %.o		:	%.c
 	$(CC) -c $< -o $@

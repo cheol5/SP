@@ -21,6 +21,7 @@ static void tcbBlockInit(Thread *block)
 {
 	block->status = THREAD_STATUS_READY;
 	block->readyCond = readyCond;
+	block->tid = 0;
 	block->bRunnable = 0;
 	block->readyMutex = readyMutex;
 	block->parentTid = pthread_self(); // pthread_create호출 전이므로 parent's tid 가 들어간다. 
@@ -30,12 +31,27 @@ static void tcbBlockInit(Thread *block)
 }
 
 static void *wrapperFunc(void *arg){
+	
+	void *ret;
 	WrapperArg *pArg = (WrapperArg *)arg;
+	void *funcPtr = pArg->funcPtr;
+	void *funcArg = pArg->funcArg;
 	Thread *pTh = pArg->pThread;
 	pTh->tid = pthread_self();
+	printf("thread id is %d, parent :%d\n", (int)pTh->tid, (int)pTh->parentTid);
 	append_left(&readyQueue, pTh); // ready queue에 삽입.
+	printf("ready queue size: %d\n", readyQueue.cnt);
+	t_node *node = readyQueue.top;
+	while (node)
+	{
+		printf("traversal tid :%d\n", (int)(node->data->tid));
+		node = node->next;
+	}
+	// pthread_mutex_unlock(&queueMutex);
 	__thread_to_ready2(pTh); // 생성된 쓰레드를 최초 1회 ready2함수를 호출한다. 
-	return pArg->funcPtr(pArg->funcArg);
+	ret = ((void *(*)(void *))funcPtr)(funcArg);
+	// free(arg);
+	return ret;
 }
 
 
@@ -43,14 +59,15 @@ static void *wrapperFunc(void *arg){
 int 	thread_create(thread_t *thread, thread_attr_t *attr, void *(*start_routine) (void *), void *arg)
 {
 	//tcb 생성해야함.
-	Thread tcbBlock;
-	WrapperArg args;
+	// pthread_mutex_lock(&queueMutex);
+	Thread *tcbBlock = (Thread *)malloc(sizeof(Thread));
+	WrapperArg *args = (WrapperArg *)malloc(sizeof(WrapperArg));
 
-	tcbBlockInit(&tcbBlock);
-	args.funcPtr = start_routine;
-	args.funcArg = arg;
-	args.pThread = &tcbBlock;
-	pthread_create(thread, 0, wrapperFunc, &args);
+	tcbBlockInit(tcbBlock);
+	args->funcPtr = start_routine;
+	args->funcArg = arg;
+	args->pThread = tcbBlock;
+	pthread_create(thread, 0, wrapperFunc, args);
 	return 0;
 }
 

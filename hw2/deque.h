@@ -4,6 +4,7 @@
 #include "Thread.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #define TRUE 1
 #define FALSE 0
 
@@ -35,5 +36,6 @@ t_node *getTcbBlock(thread_t tid);
 // deque
 extern t_deque readyQueue;
 extern t_deque waitQueue;
+extern Thread *currentTcb;
 
 #endif

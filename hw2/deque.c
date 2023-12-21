@@ -109,7 +109,11 @@ void __thread_to_ready2(Thread *pTh)
 {
 	pthread_mutex_lock(&(pTh->readyMutex));
 	while (pTh->bRunnable == FALSE)
+	{
+		printf("처음 시작했을 때 잠든다.\n");
 		pthread_cond_wait(&(pTh->readyCond), &(pTh->readyMutex));
+	}
+	printf("%d 잠에서 깬다.\n", (int)currentTcb->tid);
 	pthread_mutex_unlock(&(pTh->readyMutex));
 }
 

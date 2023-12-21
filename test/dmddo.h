@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <pthread.h>
 
 extern int myNum;
 void foo(void);
