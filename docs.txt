@@ -1,0 +1,19 @@
+1. 우선 
+
+int 	thread_create(thread_t *thread, thread_attr_t *attr, void *(*start_routine) (void *), void *arg)
+{
+	//tcb 생성해야함.
+	// pthread_mutex_lock(&queueMutex);
+	Thread *tcbBlock = (Thread *)malloc(sizeof(Thread));
+	WrapperArg *args = (WrapperArg *)malloc(sizeof(WrapperArg));
+
+	tcbBlockInit(tcbBlock);
+	args->funcPtr = start_routine;
+	args->funcArg = arg;
+	args->pThread = tcbBlock;
+	pthread_create(thread, 0, wrapperFunc, args);
+	return 0;
+}
+
+여기서 구조체를 그냥 지역변수로 선언하고 주소값을 할당하는 방식으로 했는데
+값이 겹치는 에러가 발생함. 전역변수처럼 관리가 되어버림. tid값을 새로운 스레드에서 할당하면 queue의 모든 구조체의 tid가 동시에 변경됨. 
