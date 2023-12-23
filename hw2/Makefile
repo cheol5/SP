@@ -13,7 +13,7 @@ SRCS	=	main.c\
 
 #CFLAG	=	-Wall -Wextra -Werror
 DFLAG	=	-g
-FFLAG	=	-fsanitize=address
+# FFLAG	=	-fsanitize=address
 OBJS	=	$(SRCS:%.c=%.o)
 
 all		:	$(NAME)
@@ -31,7 +31,6 @@ clean	:
 fclean	:
 	make clean
 	rm -rf $(NAME)
-	rm -rf storage
 
 re		:
 	make fclean
